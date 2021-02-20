@@ -1,7 +1,7 @@
 import flask
 from flask import request, jsonify
 import mysql.connector
-
+import jwt
 mydb = mysql.connector.connect(
 	host="localhost",
 	user="root",
@@ -11,6 +11,7 @@ mydb = mysql.connector.connect(
 
 app = flask.Flask(__name__)
 
+app.config['SECRET_KEY'] = 'RandomString'
 app.config["DEBUG"] = True
 
 @app.route('/api/v1/get/users', methods=['GET'])
@@ -43,47 +44,83 @@ def gechecktUsers():
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/get/book', methods=['GET', 'POST'])
-def getAllBooks():
+@app.route('/api/v1/get/book/<id>', methods=['GET'])
+def getAllBooks(id):
     try:
-        book = mydb.cursor()
-        book.execute('''SELECT * FROM book WHERE userId = %s''', (request.args.get("id"),))
-        allBooks = book.fetchall()
-        return jsonify(allBooks)
+        if 'x-access-tokens' in request.headers:
+            headers = request.headers.get('x-access-tokens')
+            decodeToken = jwt.decode(headers , app.config['SECRET_KEY'])
+
+            if decodeToken['mod'] == 'normal' or decodeToken['mod'] == 'readonly':
+                book = mydb.cursor()
+                book.execute('''SELECT * FROM book WHERE userId = %s''', (id,))
+                allBooks = book.fetchall()
+                return jsonify(allBooks)
+            else:
+                return 'false'
+        else:
+            return 'false'
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/get/one/book', methods=['GET'])
-def getOneBook():
+@app.route('/api/v1/get/one/book/<id>', methods=['GET'])
+def getOneBook(id):
     try:
-        book = mydb.cursor()
-        book.execute('''SELECT * FROM book WHERE bookId = %s''', (request.args.get('id'),))
-        oneBooks = book.fetchone()
-        return jsonify(oneBooks)
+        if 'x-access-tokens' in request.headers:
+            headers = request.headers.get('x-access-tokens')
+            decodeToken = jwt.decode(headers , app.config['SECRET_KEY'])
+            
+            if decodeToken['mod'] == 'normal':
+                book = mydb.cursor()
+                book.execute('''SELECT * FROM book WHERE bookId = %s''', (id,))
+                oneBooks = book.fetchone()
+                return jsonify(oneBooks)
+            else:
+                return 'false'
+        else:
+            return 'false'
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/create/book', methods=['GET', 'POST'])
+@app.route('/api/v1/create/book', methods=['POST'])
 def createBook():
     try:
-        book = mydb.cursor()
-        book.execute('''INSERT INTO book(name, description, userId) VALUES (%s, %s,%s)''', (request.args.get('name'), request.args.get('description'), request.args.get('userId')))
-        mydb.commit()
-        return 'true'
+        if 'x-access-tokens' in request.headers:
+            headers = request.headers.get('x-access-tokens')
+            decodeToken = jwt.decode(headers , app.config['SECRET_KEY'])
+            
+            if decodeToken['mod'] == 'normal':
+                
+                book = mydb.cursor()
+                book.execute('''INSERT INTO book(name, description, userId) VALUES (%s, %s,%s)''', (request.args.get('name'), request.args.get('description'), request.args.get('userId')))
+                mydb.commit()
+                return 'true'
+            else:
+                return 'false'
+        else:
+            return 'false'
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/delete/book', methods=['GET', 'POST'])
-def deleteBook():
+@app.route('/api/v1/delete/book/<id>', methods=['DELETE'])
+def deleteBook(id):
     try:
-        book = mydb.cursor()
-        book.execute('''DELETE FROM book WHERE bookId = %s''', (request.args.get('id'),))
-        mydb.commit()
-        return 'true'
+        if 'x-access-tokens' in request.headers:
+            headers = request.headers.get('x-access-tokens')
+            decodeToken = jwt.decode(headers , app.config['SECRET_KEY'])
+            
+            if decodeToken['mod'] == 'normal':
+                book = mydb.cursor()
+                book.execute('''DELETE FROM book WHERE bookId = %s''', (id,))
+                mydb.commit()
+                return 'true'
+            return 'false'
+        else:
+            return 'false'
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/edit/book', methods=['GET', 'POST'])
+@app.route('/api/v1/edit/book', methods=['PUT'])
 def editBook():
     try:
         book = mydb.cursor()
@@ -94,4 +131,4 @@ def editBook():
         print(error)
 
 if __name__ == '__main__':
-    app.run(port=105) #A method that runs the application server.
+    app.run(port=105)

@@ -4,6 +4,7 @@ import hashlib
 import requests
 import json
 import re
+import jwt
 from validate_email import validate_email
 
 app = Flask(__name__)
@@ -66,21 +67,24 @@ def login():
         user = json.loads(req.content)
         if len(user) == 0:
             return 'Wrong login info!'
-        print(user[0])
         session['_id'] = str(user[0])
         
-        return render_template('user-home.html', id = session['_id'])
+        return render_template('user_home.html', id = session['_id'])
 
 @app.route('/books', methods = ['GET'])
 def books():
     if '_id' not in session:
         return 'You are not logged in!'
-    params = {
-        'id' : session['_id']
-    }
-    req = requests.get('http://localhost:105/api/v1/get/book', params = params)
+
+    if 'token' in session:
+        headers = {'x-access-tokens': session['token']}
+    else:
+        headers = {'no-token': '0'}
+    req = requests.get('http://localhost:105/api/v1/get/book/' + session['_id'], headers = headers)
     books = json.loads(req.content)
     
+    if books == False:
+        return jsonify({"message": "ERROR: Unauthorized"}), 401 
     return render_template('books.html' , books = books)
 
 @app.route('/create_book', methods = ['GET', 'POST'])
@@ -92,36 +96,65 @@ def create_book():
         'description' : request.form['description'],
         'userId' : session['_id']
     }  
-
-    requests.post('http://localhost:105/api/v1/create/book', params = params)
+    if 'token' in session:
+        headers = {'x-access-tokens': session['token']}
+    else:
+        headers = {'no-token': '0'}
+    
+    req = requests.post('http://localhost:105/api/v1/create/book', params = params, headers = headers)
+    check = json.loads(req.content)
+    
+    if check == False:
+        return jsonify({"message": "ERROR: Unauthorized"}), 401 
     return redirect(url_for('books'))
 
-@app.route('/delete/<id>', methods = ['GET', 'POST'])
+@app.route('/delete/<id>', methods = ['GET'])
 def delete(id):
-
-    params = {
-        'id' : id
-    }  
-
-    requests.post('http://localhost:105/api/v1/delete/book', params = params)
+    if 'token' in session:
+        headers = {'x-access-tokens': session['token']}
+    else:
+        headers = {'no-token': '0'}
+    req = requests.delete('http://localhost:105/api/v1/delete/book/' + id, headers = headers)
+    check = json.loads(req.content)
+    if check == False:
+        return jsonify({"message": "ERROR: Unauthorized"}), 401 
     return redirect(url_for('books'))
 
 @app.route('/edit_book/<id>', methods = ['GET', 'POST'])
 def edit(id):
     if request.method == 'GET':
-        editBook = {
-            'id' : id
-        }
-        req = requests.get('http://localhost:105/api/v1/get/one/book', params = editBook)
+        if 'token' in session:
+            headers = {'x-access-tokens': session['token']}
+        else:
+            headers = {'no-token': '0'}
+        req = requests.get('http://localhost:105/api/v1/get/one/book/' + id, headers = headers)
         book = json.loads(req.content)
+        
+        if book == False:
+            return jsonify({"message": "ERROR: Unauthorized"}), 401 
+        
         return render_template('edit_book.html', book = book)
     params = {
         'id' : id,
         'name' : request.form['name'],
         'description' : request.form['description']
     }  
+    
+    requests.put('http://localhost:105/api/v1/edit/book', params = params)
+    return redirect(url_for('books'))
 
-    requests.post('http://localhost:105/api/v1/edit/book', params = params)
+@app.route('/create_token')
+def create_token():
+    
+    token = jwt.encode({"mod" : "normal", "exp" : datetime.datetime.utcnow() + datetime.timedelta(minutes = 30)}, app.config['SECRET_KEY'])
+    session['token'] = token
+    return redirect(url_for('books'))
+
+@app.route('/read_only_token')
+def read_only_token():
+    
+    token = jwt.encode({"mod" : "readonly", "exp" : datetime.datetime.utcnow() + datetime.timedelta(minutes = 30)}, app.config['SECRET_KEY'])
+    session['token'] = token
     return redirect(url_for('books'))
 
 if __name__ == '__main__':
