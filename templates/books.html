@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title> Books Page </title>
+	</head>
+	<body>
+        <table>
+            <thead>
+                <tr>
+                    <td>Id</td>
+                    <td>Name</td>
+                    <td>Description</td>
+                    <td>Delete</td>
+                    <td>Edit</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in books %}
+                <tr>
+                    <td>{{i[0]}}</td>
+                    <td>{{i[1]}}</td>
+                    <td>{{i[2]}}</td>
+                    <td><a href="delete/{{i[0]}}"><button>Delete</button></a></td>
+                    <td><a href="edit_book/{{i[0]}}"><button>Edit</button></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>   
+        <a href="create_book"><button>Create</button></a>     
+	</body>
+</html>

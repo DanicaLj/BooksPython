@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Edit</title>
+    </head>
+    <body>
+        <h3>Edit Page</h3>
+        <form action = '/edit_book/{{book[0]}}' method = 'POST'>
+            Name: <input type="text" name="name" value="{{book[1]}}"></br>
+            Description <input type="text" name="description" value="{{book[2]}}"></br>
+            <input type = 'submit' value = 'Edit!' /></br>
+        </form>
+    </body>
+</html>
