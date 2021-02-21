@@ -6,9 +6,21 @@ import json
 import re
 import jwt
 from validate_email import validate_email
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RandomString'
+app.config.from_object('config')
+
+CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+oauth = OAuth(app)
+oauth.register(
+    name='google',
+    server_metadata_url=CONF_URL,
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
 
 @app.route('/')
 @app.route('/index')
@@ -56,6 +68,7 @@ def register():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if '_id' in session:
+        print(session['_id'])
         return render_template('user_home.html', id = session['_id'])
     if request.method == 'GET':
         return render_template('login.html')
@@ -75,11 +88,49 @@ def login():
         
         return render_template('user_home.html', id = session['_id'])
 
+@app.route('/login_google', methods = ['GET', 'POST'])
+def login_google():
+    redirect_uri = url_for('auth', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+@app.route('/auth',  methods = ['GET', 'POST'])
+def auth():
+    
+    token = oauth.google.authorize_access_token()
+    googleUser = oauth.google.parse_id_token(token)
+
+    userData = {
+        'email' : googleUser['email'],
+        'password' : 'test'
+    }
+    req = requests.get('http://localhost:105/api/v1/get/one/user', params = userData)
+    userCheck = json.loads(req.content)
+    
+    if userCheck != None:
+        session['_id'] = str(userCheck[0])
+        return redirect('/login')
+    params = { 
+        'email' : googleUser['email'],
+        'name' : 'test',
+        'password' : 'test'
+    }
+    requests.post('http://localhost:105/api/v1/create/user', params = params)
+
+    req = requests.get('http://localhost:105/api/v1/get/one/user', params = userData)
+    user = json.loads(req.content)
+    session['_id'] = str(user[0])
+    return redirect('/login')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
 @app.route('/books', methods = ['GET'])
 def books():
     if '_id' not in session:
         return 'You are not logged in!'
-    print(session['_id'])
+    
     headers = get_token()
     req = requests.get('http://localhost:105/api/v1/get/book/' + session['_id'], headers = headers)
     books = json.loads(req.content)

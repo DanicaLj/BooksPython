@@ -27,6 +27,7 @@ def getUsers():
 @app.route('/api/v1/create/user', methods=['GET', 'POST'])
 def createUser():
     try:
+        print(request.args.get('name'))
         user = mydb.cursor()
         user.execute('''INSERT INTO user(name, email, password) VALUES (%s, %s,%s)''', (request.args.get('name'), request.args.get('email'), request.args.get('password')))
         mydb.commit()
