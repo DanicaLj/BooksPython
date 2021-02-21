@@ -28,7 +28,9 @@ def register():
         for i in users:
             if(request.form['email'] == i[2]):
                 return render_template('register.html', userExist = 'User already exist, please login')
-        
+        if(request.form['name'] == "" or request.form['email'] == "" or request.form['password'] == ""):
+            errors.append("All fields are required")
+            return render_template('register.html', errors = errors)
         if(validate_email(request.form['email']) == False):
             errors.append("Invalid email address")
         if(len(request.form['password']) <= 6):
@@ -41,7 +43,7 @@ def register():
             errors.append("Name must not start with number")
         if(len(errors) != 0 ):
             return render_template('register.html', errors = errors)
-
+        print(request.form['name'])
         hash_object = hashlib.sha256(request.form['password'].encode())
         password_hashed = hash_object.hexdigest()
         params = {
@@ -54,6 +56,8 @@ def register():
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    if '_id' in session:
+        return render_template('user_home.html', id = session['_id'])
     if request.method == 'GET':
         return render_template('login.html')
     else:
@@ -67,6 +71,7 @@ def login():
         user = json.loads(req.content)
         if len(user) == 0:
             return 'Wrong login info!'
+
         session['_id'] = str(user[0])
         
         return render_template('user_home.html', id = session['_id'])

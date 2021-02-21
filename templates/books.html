@@ -1,16 +1,19 @@
 <html>
 	<head>
 		<title> Books Page </title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 	</head>
 	<body>
-        <table>
+        <table class="table">
             <thead>
                 <tr>
-                    <td>Id</td>
-                    <td>Name</td>
-                    <td>Description</td>
-                    <td>Delete</td>
-                    <td>Edit</td>
+                    <td scope="col">Id</td>
+                    <td scope="col">Name</td>
+                    <td scope="col">Description</td>
+                    <td scope="col">Delete</td>
+                    <td scope="col">Edit</td>
                 </tr>
             </thead>
             <tbody>
@@ -19,12 +22,17 @@
                     <td>{{i[0]}}</td>
                     <td>{{i[1]}}</td>
                     <td>{{i[2]}}</td>
-                    <td><a href="delete/{{i[0]}}"><button>Delete</button></a></td>
-                    <td><a href="edit_book/{{i[0]}}"><button>Edit</button></a></td>
+                    <td><a href="delete/{{i[0]}}"><button class="btn btn-danger">Delete</button></a></td>
+                    <td><a href="edit_book/{{i[0]}}"><button class="btn btn-info">Edit</button></a></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>   
-        <a href="create_book"><button>Create</button></a>     
+        <a href="create_book"><button class="btn btn-success">Create</button></a>     
 	</body>
 </html>
+<style>
+body{
+    padding: 50px;
+}
+</style>

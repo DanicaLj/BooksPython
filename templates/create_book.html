@@ -1,13 +1,33 @@
 <html>
     <head>
         <title>Create Book</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     </head>
     <body>
-        <h3>Create Book Page</h3>
-        <form action = '/create_book' method = 'POST'>
-            Name: <input type="text" name="name"></br>
-            Description <input type="text" name="description"></br>
-            <input type = 'submit' value = 'Create!' /></br>
-        </form>
+        <div class="form-wrapper">
+            <h3>Create Book Page</h3>
+            <form action = '/create_book' method = 'POST'>
+                <div class="form-group">
+                  <label for="name"> Name: </label> 
+                  <input class="form-control" type="text" name="name"></br>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input class="form-control" type="text" name="description"></br>
+                </div>
+                <button type="submit" class="btn btn-success">Create</button>
+            </form>
+        </div>
     </body>
 </html>
+<style>
+.form-wrapper{
+    width: 300px;
+    border: 1px solid lightblue;
+}
+body{
+    margin-left: 50px;
+}
+</style>

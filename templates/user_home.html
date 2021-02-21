@@ -1,10 +1,25 @@
 <html>
     <head>
         <title>User</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     </head>
     <body>
-        <h3>User Page</h3>
-        <a href = "read_only_token"><button>Read Only</button></a>
-        <a href = "create_token"><button>CRUD</button></a>
+        <div class="wrapper">
+            <h3>User Page</h3>
+            <a href = "read_only_token"><button class="btn btn-primary">Read Only</button></a>
+            <a href = "create_token"><button class="btn btn-primary">CRUD</button></a>
+        </div>
     </body>
 </html>
+<style>
+.wrapper{
+    width: 100%;
+    text-align: center;
+}
+.btn{
+    width:100px;
+    height: 50px;
+}
+</style>

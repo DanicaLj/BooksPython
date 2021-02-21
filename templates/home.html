@@ -1,10 +1,25 @@
 <html>
     <head>
         <title>Home</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     </head>
     <body>
-        <h3>Home Page</h3>
-        <a href="register"><button>Register</button></a>
-        <a href="login"><button>Login</button></a>
+        <div class="wrapper">
+            <h3>Home Page</h3>
+            <a href="register"><button class="btn btn-primary">Register</button></a>
+            <a href="login"><button class="btn btn-primary">Login</button></a>
+        </div>
     </body>
 </html>
+<style>
+.wrapper{
+    width: 100%;
+    text-align: center;
+}
+.btn{
+    width:100px;
+    height: 50px;
+}
+</style>
