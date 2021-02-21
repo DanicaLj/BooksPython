@@ -24,10 +24,9 @@ def getUsers():
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/create/user', methods=['GET', 'POST'])
+@app.route('/api/v1/create/user', methods=['POST'])
 def createUser():
     try:
-        print(request.args.get('name'))
         user = mydb.cursor()
         user.execute('''INSERT INTO user(name, email, password) VALUES (%s, %s,%s)''', (request.args.get('name'), request.args.get('email'), request.args.get('password')))
         mydb.commit()
@@ -35,7 +34,7 @@ def createUser():
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/get/one/user', methods=['GET', 'POST'])
+@app.route('/api/v1/get/one/user', methods=['GET'])
 def gechecktUsers():
     try:
         user = mydb.cursor()
@@ -121,11 +120,11 @@ def deleteBook(id):
     except mysql.connector.Error as error:
         print(error)
 
-@app.route('/api/v1/edit/book', methods=['PUT'])
-def editBook():
+@app.route('/api/v1/edit/book/<id>', methods=['PUT'])
+def editBook(id):
     try:
         book = mydb.cursor()
-        book.execute('''UPDATE book SET name = %s, description = %s WHERE bookId = %s''', (request.args.get('name'),request.args.get('description'), request.args.get('id')))
+        book.execute('''UPDATE book SET name = %s, description = %s WHERE bookId = %s''', (request.args.get('name'),request.args.get('description'), id))
         mydb.commit()
         return 'true'
     except mysql.connector.Error as error:

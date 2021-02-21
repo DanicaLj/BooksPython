@@ -68,7 +68,6 @@ def register():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if '_id' in session:
-        print(session['_id'])
         return render_template('user_home.html', id = session['_id'])
     if request.method == 'GET':
         return render_template('login.html')
@@ -81,19 +80,19 @@ def login():
         }
         req = requests.get('http://localhost:105/api/v1/get/one/user', params = params)
         user = json.loads(req.content)
-        if len(user) == 0:
+        if user == None:
             return 'Wrong login info!'
 
         session['_id'] = str(user[0])
         
         return render_template('user_home.html', id = session['_id'])
 
-@app.route('/login_google', methods = ['GET', 'POST'])
+@app.route('/login_google')
 def login_google():
     redirect_uri = url_for('auth', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
-@app.route('/auth',  methods = ['GET', 'POST'])
+@app.route('/auth')
 def auth():
     
     token = oauth.google.authorize_access_token()
@@ -118,6 +117,7 @@ def auth():
 
     req = requests.get('http://localhost:105/api/v1/get/one/user', params = userData)
     user = json.loads(req.content)
+    print(user[0])
     session['_id'] = str(user[0])
     return redirect('/login')
 
@@ -181,12 +181,11 @@ def edit(id):
         
         return render_template('edit_book.html', book = book)
     params = {
-        'id' : id,
         'name' : request.form['name'],
         'description' : request.form['description']
     }  
     
-    requests.put('http://localhost:105/api/v1/edit/book', params = params)
+    requests.put('http://localhost:105/api/v1/edit/book/' + id , params = params)
     return redirect(url_for('books'))
 
 @app.route('/create_token')
