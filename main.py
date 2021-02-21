@@ -43,9 +43,8 @@ def register():
             errors.append("Name must not start with number")
         if(len(errors) != 0 ):
             return render_template('register.html', errors = errors)
-        print(request.form['name'])
-        hash_object = hashlib.sha256(request.form['password'].encode())
-        password_hashed = hash_object.hexdigest()
+        
+        password_hashed = hash_password(request.form['password'])
         params = {
             'name' : request.form['name'], 
             'email' : request.form['email'],
@@ -61,8 +60,8 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        hash_object = hashlib.sha256(request.form['password'].encode())
-        password_hashed = hash_object.hexdigest()
+       
+        password_hashed = hash_password(request.form['password'])
         params = {
             'password' : password_hashed,
             'email' : request.form['email']
@@ -80,11 +79,8 @@ def login():
 def books():
     if '_id' not in session:
         return 'You are not logged in!'
-
-    if 'token' in session:
-        headers = {'x-access-tokens': session['token']}
-    else:
-        headers = {'no-token': '0'}
+    print(session['_id'])
+    headers = get_token()
     req = requests.get('http://localhost:105/api/v1/get/book/' + session['_id'], headers = headers)
     books = json.loads(req.content)
     
@@ -101,10 +97,8 @@ def create_book():
         'description' : request.form['description'],
         'userId' : session['_id']
     }  
-    if 'token' in session:
-        headers = {'x-access-tokens': session['token']}
-    else:
-        headers = {'no-token': '0'}
+
+    headers = get_token()
     
     req = requests.post('http://localhost:105/api/v1/create/book', params = params, headers = headers)
     check = json.loads(req.content)
@@ -115,10 +109,8 @@ def create_book():
 
 @app.route('/delete/<id>', methods = ['GET'])
 def delete(id):
-    if 'token' in session:
-        headers = {'x-access-tokens': session['token']}
-    else:
-        headers = {'no-token': '0'}
+
+    headers = get_token()
     req = requests.delete('http://localhost:105/api/v1/delete/book/' + id, headers = headers)
     check = json.loads(req.content)
     if check == False:
@@ -128,10 +120,8 @@ def delete(id):
 @app.route('/edit_book/<id>', methods = ['GET', 'POST'])
 def edit(id):
     if request.method == 'GET':
-        if 'token' in session:
-            headers = {'x-access-tokens': session['token']}
-        else:
-            headers = {'no-token': '0'}
+        
+        headers = get_token()
         req = requests.get('http://localhost:105/api/v1/get/one/book/' + id, headers = headers)
         book = json.loads(req.content)
         
@@ -161,6 +151,19 @@ def read_only_token():
     token = jwt.encode({"mod" : "readonly", "exp" : datetime.datetime.utcnow() + datetime.timedelta(minutes = 30)}, app.config['SECRET_KEY'])
     session['token'] = token
     return redirect(url_for('books'))
+
+def get_token():
+    if 'token' in session:
+        headers = {'x-access-tokens': session['token']}
+    else:
+        headers = {'no-token': '0'}
+    return headers
+
+def hash_password(password):
+
+    hash_object = hashlib.sha256(password.encode())
+    password_hashed = hash_object.hexdigest()
+    return password_hashed
 
 if __name__ == '__main__':
 	app.run()
