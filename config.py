@@ -1,2 +1,7 @@
-GOOGLE_CLIENT_ID = "82157790749-8h3k7a1ep5qee9olhmkjbqid29fbrq5h.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "_7sD3cWQlGJv66aKrEEGaKG9"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')

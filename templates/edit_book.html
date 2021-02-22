@@ -8,14 +8,14 @@
     <body>
         <div class="form-wrapper">
             <h3>Edit Page</h3>
-            <form action = '/edit_book/{{book[0]}}' method = 'POST'>
+            <form action = "/edit_book/{{book['bookId']}}" method = 'POST'>
                 <div class="form-group">
                     <label for="name"> Name:</label>
-                    <input class="form-control" type="text" name="name" value="{{book[1]}}"></br>
+                    <input class="form-control" type="text" name="name" value="{{book['name']}}"></br>
                 </div>
                 <div class="form-group">
                     <label for="description"> Description </label> 
-                    <input class="form-control" type="text" name="description" value="{{book[2]}}"></br>
+                    <input class="form-control" type="text" name="description" value="{{book['description']}}"></br>
                 </div>
                 <button type="submit" class="btn btn-info">Edit</button>
             </form>

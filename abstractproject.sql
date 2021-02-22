@@ -12,7 +12,7 @@ CREATE TABLE book (
 CREATE TABLE user (
   userId int NOT NULL AUTO_INCREMENT,
   name varchar(45) NOT NULL,
-  email varchar(45) NOT NULL,
+  email varchar(45) NOT NULL UNIQUE,
   password varchar(255) NOT NULL,
   PRIMARY KEY (userId)
 );

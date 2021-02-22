@@ -18,15 +18,17 @@
                 </tr>
             </thead>
             <tbody>
-                {% for i in books %}
-                <tr>
-                    <td>{{i[0]}}</td>
-                    <td>{{i[1]}}</td>
-                    <td>{{i[2]}}</td>
-                    <td><a href="delete/{{i[0]}}"><button class="btn btn-danger">Delete</button></a></td>
-                    <td><a href="edit_book/{{i[0]}}"><button class="btn btn-info">Edit</button></a></td>
-                </tr>
-                {% endfor %}
+                {% if (books): %}
+                    {% for i in books %}
+                    <tr>
+                        <td>{{i['bookId']}}</td>
+                        <td>{{i['name']}}</td>
+                        <td>{{i['description']}}</td>
+                        <td><a href="delete/{{i['bookId']}}"><button class="btn btn-danger">Delete</button></a></td>
+                        <td><a href="edit_book/{{i['bookId']}}"><button class="btn btn-info">Edit</button></a></td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
             </tbody>
         </table>   
         <a href="create_book"><button class="btn btn-success">Create</button></a>     

@@ -38,7 +38,7 @@ def register():
         req = requests.get('http://localhost:105/api/v1/get/users')
         users = json.loads(req.content)
         for i in users:
-            if(request.form['email'] == i[2]):
+            if(request.form['email'] == i['email']):
                 return render_template('register.html', userExist = 'User already exist, please login')
         if(request.form['name'] == "" or request.form['email'] == "" or request.form['password'] == ""):
             errors.append("All fields are required")
@@ -80,10 +80,11 @@ def login():
         }
         req = requests.get('http://localhost:105/api/v1/get/one/user', params = params)
         user = json.loads(req.content)
-        if user == None:
+        
+        if user['message'] == "none":
             return 'Wrong login info!'
 
-        session['_id'] = str(user[0])
+        session['_id'] = user['userId']
         
         return render_template('user_home.html', id = session['_id'])
 
@@ -105,8 +106,8 @@ def auth():
     req = requests.get('http://localhost:105/api/v1/get/one/user', params = userData)
     userCheck = json.loads(req.content)
     
-    if userCheck != None:
-        session['_id'] = str(userCheck[0])
+    if userCheck['message'] != "none":
+        session['_id'] = userCheck['userId']
         return redirect('/login')
     params = { 
         'email' : googleUser['email'],
@@ -117,8 +118,8 @@ def auth():
 
     req = requests.get('http://localhost:105/api/v1/get/one/user', params = userData)
     user = json.loads(req.content)
-    print(user[0])
-    session['_id'] = str(user[0])
+
+    session['_id'] = user['userId']
     return redirect('/login')
 
 @app.route('/logout')
@@ -130,14 +131,14 @@ def logout():
 def books():
     if '_id' not in session:
         return 'You are not logged in!'
-    
     headers = get_token()
     req = requests.get('http://localhost:105/api/v1/get/book/' + session['_id'], headers = headers)
     books = json.loads(req.content)
-    
-    if books == False:
+    print(books)
+    if len(books) == 0 or len(books) > 0:
+        return render_template('books.html' , books = books)
+    if books['message'] == "false":
         return jsonify({"message": "ERROR: Unauthorized"}), 401 
-    return render_template('books.html' , books = books)
 
 @app.route('/create_book', methods = ['GET', 'POST'])
 def create_book():
@@ -154,7 +155,7 @@ def create_book():
     req = requests.post('http://localhost:105/api/v1/create/book', params = params, headers = headers)
     check = json.loads(req.content)
     
-    if check == False:
+    if check['message'] == 'false':
         return jsonify({"message": "ERROR: Unauthorized"}), 401 
     return redirect(url_for('books'))
 
@@ -162,9 +163,15 @@ def create_book():
 def delete(id):
 
     headers = get_token()
+    reqData = requests.get('http://localhost:105/api/v1/get/one/book/' + id, headers = headers)
+    book = json.loads(reqData.content)
+    if book['message'] == "false":
+        return jsonify({"message": "ERROR: Unauthorized"}), 401
+    if book['userId'] != session['_id']:
+        return jsonify({"message": "ERROR: Unauthorized"}), 401 
     req = requests.delete('http://localhost:105/api/v1/delete/book/' + id, headers = headers)
     check = json.loads(req.content)
-    if check == False:
+    if check['message'] == "false":
         return jsonify({"message": "ERROR: Unauthorized"}), 401 
     return redirect(url_for('books'))
 
@@ -176,7 +183,7 @@ def edit(id):
         req = requests.get('http://localhost:105/api/v1/get/one/book/' + id, headers = headers)
         book = json.loads(req.content)
         
-        if book == False:
+        if book['message'] == "false":
             return jsonify({"message": "ERROR: Unauthorized"}), 401 
         
         return render_template('edit_book.html', book = book)
